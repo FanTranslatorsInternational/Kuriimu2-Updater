@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "update": {
+      "commandName": "Project",
+      "commandLineArgs": "WinForms Kuriimu2.WinForms.exe"
+    }
+  }
+}
