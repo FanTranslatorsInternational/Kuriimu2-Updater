@@ -29,7 +29,7 @@ namespace update
 
             using var zipArchive = new ZipArchive(updateFile, ZipArchiveMode.Read);
 
-            var currentDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var currentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
 
             Console.Write($"Extract update to directory '{currentDirectory}'... ");
             zipArchive.ExtractToDirectory(currentDirectory, true);
