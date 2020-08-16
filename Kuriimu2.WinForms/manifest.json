@@ -1,1 +1,1 @@
-{"source_type": "Github Action", "build_number": $GITHUB_RUN_ID, "application_name": "Kuriimu2.WinForms.exe"}
+{"source_type": "Github Action", "build_number": $env:GITHUB_RUN_ID, "application_name": "Kuriimu2.WinForms.exe"}
