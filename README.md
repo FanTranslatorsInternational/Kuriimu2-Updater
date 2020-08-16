@@ -1,2 +1,2 @@
 # Kuriimu2-Update
-Update repository for any Kuriimu2 application.
+Source code for the updater of Kuriimu2 applications.
