@@ -7,8 +7,8 @@ namespace update.Parameters
     {
         private static readonly IDictionary<Application, string> BaseUrls = new Dictionary<Application, string>
         {
-            [Application.WinForms] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-Update/master/Kuriimu2.WinForms",
-			[Application.CommandLine] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-Update/master/Kuriimu2.Cmd"
+            [Application.WinForms] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-WinForms-Update/master",
+			[Application.CommandLine] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/master"
         };
 
         public Application Application { get; }
