@@ -10,6 +10,9 @@ using update.Parameters;
 
 namespace update
 {
+    /// <summary>
+    /// A class to update an application.
+    /// </summary>
     class Updater
     {
         private const string ManifestName_ = "manifest.json";
@@ -19,13 +22,21 @@ namespace update
 
         private const string SigningAlg_ = "SHA-512withRSA";
 
-        public UpdateParameters Parameters { get; }
+        private readonly UpdateParameters _parameters;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="Updater"/>.
+        /// </summary>
+        /// <param name="parameters">The parameters the updater uses.</param>
         public Updater(UpdateParameters parameters)
         {
-            Parameters = parameters;
+            _parameters = parameters;
         }
 
+        /// <summary>
+        /// Gets the manifest of the updateable application.
+        /// </summary>
+        /// <returns>The parsed manifest.</returns>
         public Manifest GetManifest()
         {
             var responseStream = GetResourceStream(ManifestName_);
@@ -34,6 +45,10 @@ namespace update
             return JsonConvert.DeserializeObject<Manifest>(reader.ReadToEnd());
         }
 
+        /// <summary>
+        /// Gets the latest update zip for the updateable application.
+        /// </summary>
+        /// <returns>The latest update zip.</returns>
         public Stream GetUpdateFile()
         {
             var responseStream = GetResourceStream(BuildName_);
@@ -48,6 +63,13 @@ namespace update
             return responseStream;
         }
 
+        /// <summary>
+        /// Checks if a given signature for a file is valid.
+        /// </summary>
+        /// <param name="updateFile">The file to verify.</param>
+        /// <param name="signature">The signature to verify against.</param>
+        /// <param name="publicKeyStream">The public key to the signature.</param>
+        /// <returns>If the file is valid using the signature and public key.</returns>
         private bool IsSignatureValid(Stream updateFile, Stream signature, Stream publicKeyStream)
         {
             Console.Write("Verifying signature... ");
@@ -72,6 +94,11 @@ namespace update
             return result;
         }
 
+        /// <summary>
+        /// Gets a resource from the repository.
+        /// </summary>
+        /// <param name="resourceName">The name of the resource.</param>
+        /// <returns>The resource stream.</returns>
         private Stream GetResourceStream(string resourceName)
         {
             Console.Write($"Retrieve resource '{resourceName}'... ");
@@ -89,11 +116,22 @@ namespace update
             return ToMemoryStream(responseStream);
         }
 
+        /// <summary>
+        /// Creates a request to a resource.
+        /// </summary>
+        /// <param name="resourceName">The name of the resource.</param>
+        /// <returns>The resource request.</returns>
         private WebRequest CreateRequest(string resourceName)
         {
-            return WebRequest.CreateHttp(Parameters.BaseUrl + "/" + resourceName);
+            return WebRequest.CreateHttp(_parameters.BaseUrl + "/" + resourceName);
         }
 
+        /// <summary>
+        /// Converts any given stream to a memory stream.
+        /// </summary>
+        /// <param name="input">The stream to convert.</param>
+        /// <returns>The converted stream.</returns>
+        /// <remarks>Mainly used to fully read a stream that does not support reading by length, but reading in buffers, like an Internet Resource.</remarks>
         private Stream ToMemoryStream(Stream input)
         {
             var ms = new MemoryStream();

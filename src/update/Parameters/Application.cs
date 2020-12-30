@@ -7,6 +7,9 @@ namespace update.Parameters
     enum Application
     {
         WinForms,
-        CommandLine
+        CommandLine,
+        EtoFormsWpf,
+        EtoFormsGtk,
+        EtoFormsMac
     }
 }

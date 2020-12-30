@@ -12,21 +12,25 @@ namespace update
     {
         static void Main(string[] args)
         {
+            // Try parsing parameters
             if (!TryGetObject(() => UpdateParameters.Parse(args), out var parameters))
                 return;
 
+            // Close current application that needs an update
             if (!WaitForClose(parameters.InitialExecutable, 10))
             {
                 Console.WriteLine($"Could not close '{parameters.InitialExecutable}'. Exiting...");
                 return;
             }
 
+            // Get update files
             var updater = new Updater(parameters);
             if (!TryGetObject(() => updater.GetUpdateFile(), out var updateFile))
                 return;
             if (!TryGetObject(() => updater.GetManifest(), out var manifest))
                 return;
 
+            // Extract the update files to the application directory
             using var zipArchive = new ZipArchive(updateFile, ZipArchiveMode.Read);
 
             var currentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
@@ -35,6 +39,7 @@ namespace update
             zipArchive.ExtractToDirectory(currentDirectory, true);
             Console.WriteLine("OK");
 
+            // Start the updated application
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo(manifest.ApplicationName)
@@ -42,6 +47,13 @@ namespace update
             process.Start();
         }
 
+        /// <summary>
+        /// Executes any given <see cref="Func{TObject}"/> and catches all exceptions.
+        /// </summary>
+        /// <typeparam name="TObject">The return type of the delegate.</typeparam>
+        /// <param name="getFunc">The delegate to execute.</param>
+        /// <param name="result">The result of the delegate.</param>
+        /// <returns>If the delegate was executed without throwing an exception.</returns>
         private static bool TryGetObject<TObject>(Func<TObject> getFunc, out TObject result) where TObject : class
         {
             result = null;
@@ -59,6 +71,12 @@ namespace update
             return true;
         }
 
+        /// <summary>
+        /// Waits for a process to exit.
+        /// </summary>
+        /// <param name="process">The process to wait on.</param>
+        /// <param name="timeOut">The timeout for the waiting cycle.</param>
+        /// <returns>If the process exited successfully.</returns>
         private static bool WaitForClose(string process, int timeOut)
         {
             Console.Write($"Wait for '{process}' to close... ");
