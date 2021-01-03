@@ -10,8 +10,8 @@ namespace update.Parameters
     {
         private static readonly IDictionary<Application, string> BaseUrls = new Dictionary<Application, string>
         {
-            [Application.WinForms] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-WinForms-Update/master",
-            [Application.CommandLine] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/master",
+            [Application.WinForms] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-WinForms-Update/main",
+            [Application.CommandLine] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/main",
             [Application.EtoFormsWpf] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Wpf",
             [Application.EtoFormsGtk] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Gtk",
             [Application.EtoFormsMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Mac"
