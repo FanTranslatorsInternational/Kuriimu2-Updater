@@ -14,6 +14,12 @@ namespace update.Models
         public string SourceType { get; set; }
 
         /// <summary>
+        /// The current version monicker of the update.
+        /// </summary>
+        [JsonProperty("version")]
+        public string Version { get; set; }
+
+        /// <summary>
         /// The current build number of the update.
         /// </summary>
         [JsonProperty("build_number")]
