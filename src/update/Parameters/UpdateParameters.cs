@@ -10,8 +10,9 @@ namespace update.Parameters
     {
         private static readonly IDictionary<Application, string> BaseUrls = new Dictionary<Application, string>
         {
-            [Application.WinForms] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-WinForms-Update/main",
-            [Application.CommandLine] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/main",
+            [Application.CommandLineWindows] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/main/Windows",
+            [Application.CommandLineLinux] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/main/Linux",
+            [Application.CommandLineMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/main/Mac",
             [Application.EtoFormsWpf] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Wpf",
             [Application.EtoFormsGtk] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Gtk",
             [Application.EtoFormsMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Mac"
@@ -50,10 +51,10 @@ namespace update.Parameters
                 throw new InvalidOperationException("At least 2 arguments have to be given.");
 
             if (!Enum.TryParse<Application>(args[0].Replace(".", ""), out var application))
-                throw new InvalidOperationException($"Invalid application indicator '{args[0]}'.");
+                throw new InvalidOperationException($"Invalid application monicker '{args[0]}'.");
 
             if (!BaseUrls.ContainsKey(application))
-                throw new InvalidOperationException($"Application '{args[0]}' is not supported.");
+                throw new InvalidOperationException($"Application {args[0]} is not supported.");
 
             return new UpdateParameters(application, args[1]);
         }

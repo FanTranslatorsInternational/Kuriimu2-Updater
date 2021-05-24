@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace update.Parameters
+﻿namespace update.Parameters
 {
     enum Application
     {
-        WinForms,
-        CommandLine,
+        CommandLineWindows,
+        CommandLineLinux,
+        CommandLineMac,
         EtoFormsWpf,
         EtoFormsGtk,
         EtoFormsMac
