@@ -15,7 +15,10 @@ namespace update.Parameters
             [Application.CommandLineMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-CommandLine-Update/main/Mac",
             [Application.EtoFormsWpf] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Wpf",
             [Application.EtoFormsGtk] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Gtk",
-            [Application.EtoFormsMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Mac"
+            [Application.EtoFormsMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-EtoForms-Update/main/Mac",
+            [Application.ImGuiWindows] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-ImGuiForms-Update/main/Windows",
+            [Application.ImGuiLinux] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-ImGuiForms-Update/main/Linux",
+            [Application.ImGuiMac] = "https://raw.githubusercontent.com/FanTranslatorsInternational/Kuriimu2-ImGuiForms-Update/main/Mac"
         };
 
         /// <summary>

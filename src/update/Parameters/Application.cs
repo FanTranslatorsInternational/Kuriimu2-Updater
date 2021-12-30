@@ -7,6 +7,9 @@
         CommandLineMac,
         EtoFormsWpf,
         EtoFormsGtk,
-        EtoFormsMac
+        EtoFormsMac,
+        ImGuiWindows,
+        ImGuiLinux,
+        ImGuiMac
     }
 }
