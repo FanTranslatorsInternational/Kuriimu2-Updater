@@ -1,34 +1,39 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace update.Models
 {
     /// <summary>
     /// A class holding manifest information.
     /// </summary>
-    class Manifest
+    internal class Manifest
     {
         /// <summary>
         /// The source type of the update.
         /// </summary>
-        [JsonProperty("source_type")]
-        public string SourceType { get; set; }
+        [JsonPropertyName("source_type")]
+        public required string SourceType { get; set; }
 
         /// <summary>
         /// The current version monicker of the update.
         /// </summary>
-        [JsonProperty("version")]
-        public string Version { get; set; }
+        [JsonPropertyName("version")]
+        public required string Version { get; set; }
 
         /// <summary>
         /// The current build number of the update.
         /// </summary>
-        [JsonProperty("build_number")]
-        public string BuildNumber { get; set; }
+        [JsonPropertyName("build_number")]
+        public required string BuildNumber { get; set; }
 
         /// <summary>
         /// The name of the executable to start after the update.
         /// </summary>
-        [JsonProperty("application_name")]
-        public string ApplicationName { get; set; }
+        [JsonPropertyName("application_name")]
+        public required string ApplicationName { get; set; }
+    }
+
+    [JsonSerializable(typeof(Manifest))]
+    internal partial class ManifestJsonContext : JsonSerializerContext
+    {
     }
 }

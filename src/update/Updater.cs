@@ -1,10 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Net;
-using Newtonsoft.Json;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.OpenSsl;
-using Org.BouncyCastle.Security;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text.Json;
+using System.Threading.Tasks;
 using update.Models;
 using update.Parameters;
 
@@ -19,8 +18,6 @@ namespace update
         private const string BuildName_ = "latest.zip";
         private const string SignatureName_ = "latest.sig";
         private const string PublicKeyName_ = "publickey.pem";
-
-        private const string SigningAlg_ = "SHA-512withRSA";
 
         private readonly UpdateParameters _parameters;
 
@@ -37,26 +34,33 @@ namespace update
         /// Gets the manifest of the updateable application.
         /// </summary>
         /// <returns>The parsed manifest.</returns>
-        public Manifest GetManifest()
+        public async Task<Manifest?> GetManifest()
         {
-            var responseStream = GetResourceStream(ManifestName_);
+            var responseStream = await GetResourceStream(ManifestName_);
 
             var reader = new StreamReader(responseStream);
-            return JsonConvert.DeserializeObject<Manifest>(reader.ReadToEnd());
+            var text = await reader.ReadToEndAsync();
+
+            return JsonSerializer.Deserialize(text, ManifestJsonContext.Default.Manifest);
         }
 
         /// <summary>
         /// Gets the latest update zip for the updateable application.
         /// </summary>
         /// <returns>The latest update zip.</returns>
-        public Stream GetUpdateFile()
+        public async Task<Stream> GetUpdateFile()
         {
-            var responseStream = GetResourceStream(BuildName_);
+            var responseStream = await GetResourceStream(BuildName_);
+            responseStream = ToMemoryStream(responseStream);
 
             // Verify signature
-            var signature = GetResourceStream(SignatureName_);
-            var publicKey = GetResourceStream(PublicKeyName_);
-            if (!IsSignatureValid(responseStream, signature, publicKey))
+            var signature = await GetResourceStream(SignatureName_);
+            var publicKey = await GetResourceStream(PublicKeyName_);
+
+            using var publicKeyReader = new StreamReader(publicKey);
+            var publicKeyPem = await publicKeyReader.ReadToEndAsync();
+
+            if (!IsSignatureValid(responseStream, signature, publicKeyPem))
                 throw new InvalidOperationException("Signature of the update is not valid.");
 
             responseStream.Position = 0;
@@ -68,26 +72,24 @@ namespace update
         /// </summary>
         /// <param name="updateFile">The file to verify.</param>
         /// <param name="signature">The signature to verify against.</param>
-        /// <param name="publicKeyStream">The public key to the signature.</param>
+        /// <param name="publicKeyPem">The public key to the signature in PEM format.</param>
         /// <returns>If the file is valid using the signature and public key.</returns>
-        private bool IsSignatureValid(Stream updateFile, Stream signature, Stream publicKeyStream)
+        private static bool IsSignatureValid(Stream updateFile, Stream signature, string publicKeyPem)
         {
             Console.Write("Verifying signature... ");
 
-            var publicKey = (AsymmetricKeyParameter)new PemReader(new StreamReader(publicKeyStream)).ReadObject();
-            if (publicKey == null)
-                throw new InvalidOperationException("Could not read the public key.");
-
-            var signer = SignerUtilities.GetSigner(SigningAlg_);
-            signer.Init(false, publicKey);
-
-            var buffer = new byte[updateFile.Length];
-            updateFile.Read(buffer, 0, buffer.Length);
-            signer.BlockUpdate(buffer, 0, buffer.Length);
+            using var rsa = RSA.Create();
+            rsa.ImportFromPem(publicKeyPem);
 
             var sigBuffer = new byte[signature.Length];
-            signature.Read(sigBuffer, 0, sigBuffer.Length);
-            var result = signer.VerifySignature(sigBuffer);
+            _ = signature.Read(sigBuffer, 0, sigBuffer.Length);
+
+            bool result = rsa.VerifyData(
+                updateFile,
+                sigBuffer,
+                HashAlgorithmName.SHA512,
+                RSASignaturePadding.Pkcs1 // or Pss if required
+            );
 
             Console.WriteLine(result ? "OK" : "FAIL");
 
@@ -99,17 +101,21 @@ namespace update
         /// </summary>
         /// <param name="resourceName">The name of the resource.</param>
         /// <returns>The resource stream.</returns>
-        private Stream GetResourceStream(string resourceName)
+        private async Task<Stream> GetResourceStream(string resourceName)
         {
             Console.Write($"Retrieve resource '{resourceName}'... ");
+
+            var client = new HttpClient();
             var request = CreateRequest(resourceName);
 
-            var responseStream = request.GetResponse().GetResponseStream();
-            if (responseStream == null)
+            var response = await client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
             {
                 Console.WriteLine("FAIL");
                 throw new InvalidOperationException($"Could not retrieve data from '{resourceName}'.");
             }
+
+            var responseStream = await response.Content.ReadAsStreamAsync();
 
             Console.WriteLine("OK");
 
@@ -121,9 +127,9 @@ namespace update
         /// </summary>
         /// <param name="resourceName">The name of the resource.</param>
         /// <returns>The resource request.</returns>
-        private WebRequest CreateRequest(string resourceName)
+        private HttpRequestMessage CreateRequest(string resourceName)
         {
-            return WebRequest.CreateHttp(_parameters.BaseUrl + "/" + resourceName);
+            return new HttpRequestMessage(HttpMethod.Get, _parameters.BaseUrl + "/" + resourceName);
         }
 
         /// <summary>

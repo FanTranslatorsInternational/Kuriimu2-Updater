@@ -4,16 +4,18 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using update.Parameters;
 
 namespace update
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // Try parsing parameters
-            if (!TryGetObject(() => UpdateParameters.Parse(args), out var parameters))
+            var parameters = await GetObjectOrDefaultAsync(() => Task.FromResult(UpdateParameters.Parse(args))!);
+            if (parameters is null)
                 return;
 
             // Close current application that needs an update
@@ -25,9 +27,12 @@ namespace update
 
             // Get update files
             var updater = new Updater(parameters);
-            if (!TryGetObject(() => updater.GetUpdateFile(), out var updateFile))
+            var updateFile = await GetObjectOrDefaultAsync(() => updater.GetUpdateFile()!);
+            if (updateFile is null)
                 return;
-            if (!TryGetObject(() => updater.GetManifest(), out var manifest))
+
+            var manifest = await GetObjectOrDefaultAsync(() => updater.GetManifest());
+            if (manifest is null)
                 return;
 
             // Extract the update files to the application directory
@@ -40,11 +45,14 @@ namespace update
             Console.WriteLine("OK");
 
             // Start the updated application
+            Console.Write($"Start updated application '{parameters.InitialExecutable}'... ");
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo(manifest.ApplicationName)
             };
             process.Start();
+
+            Console.WriteLine("OK");
         }
 
         /// <summary>
@@ -52,23 +60,18 @@ namespace update
         /// </summary>
         /// <typeparam name="TObject">The return type of the delegate.</typeparam>
         /// <param name="getFunc">The delegate to execute.</param>
-        /// <param name="result">The result of the delegate.</param>
-        /// <returns>If the delegate was executed without throwing an exception.</returns>
-        private static bool TryGetObject<TObject>(Func<TObject> getFunc, out TObject result) where TObject : class
+        /// <returns>The asynchronous operation returning the object.</returns>
+        private static async Task<TObject?> GetObjectOrDefaultAsync<TObject>(Func<Task<TObject?>> getFunc) where TObject : class
         {
-            result = null;
-
             try
             {
-                result = getFunc();
+                return await getFunc();
             }
             catch (InvalidOperationException ioe)
             {
                 Console.WriteLine(ioe.Message);
-                return false;
+                return null;
             }
-
-            return true;
         }
 
         /// <summary>
